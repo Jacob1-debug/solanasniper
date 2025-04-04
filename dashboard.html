@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Sniper Bot Dashboard</title>
+  <style>
+    body { font-family: Arial, sans-serif; padding: 20px; background: #f7f9fb; }
+    h1 { color: #333; }
+    table { border-collapse: collapse; width: 100%; margin-top: 20px; }
+    th, td { border: 1px solid #ccc; padding: 8px; text-align: left; }
+    th { background-color: #eee; }
+    .tracked { background-color: #ffffcc; }
+    .hit { background-color: #ccffcc; }
+    .bought { background-color: #d0eaff; }
+  </style>
+</head>
+<body>
+  <h1>🧠 Sniper Bot Dashboard</h1>
+  <p>Live log from <code>sniper_log.csv</code> (auto-refreshes every 30s)</p>
+  <table id="logTable">
+    <thead>
+      <tr>
+        <th>Timestamp</th>
+        <th>Token</th>
+        <th>Amount / Price</th>
+        <th>Status</th>
+      </tr>
+    </thead>
+    <tbody></tbody>
+  </table>
+
+  <script>
+    async function fetchCSV() {
+      try {
+        const res = await fetch('sniper_log.csv');
+        const text = await res.text();
+        const rows = text.trim().split('\n').slice(1); // skip headers
+        const tbody = document.querySelector('tbody');
+        tbody.innerHTML = '';
+
+        rows.reverse().forEach(row => {
+          const [timestamp, token, amount, status] = row.split(',');
+          const tr = document.createElement('tr');
+          tr.className = status.toLowerCase();
+          tr.innerHTML = `
+            <td>${timestamp}</td>
+            <td><a href="https://solscan.io/token/${token}" target="_blank">${token}</a></td>
+            <td>${amount}</td>
+            <td>${status}</td>
+          `;
+          tbody.appendChild(tr);
+        });
+      } catch (err) {
+        console.error("Failed to load CSV:", err);
+      }
+    }
+
+    fetchCSV();
+    setInterval(fetchCSV, 30000); // auto-refresh every 30s
+  </script>
+</body>
+</html>
